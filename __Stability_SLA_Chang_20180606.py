@@ -177,10 +177,13 @@ def serializepacket(speedL,speedR,accL,accR,theta):
 	return(outpack)
 	
 def receivePacket(recvPack):
-	
-	unpack=struct.unpack('>B 5h 21B',bytes(recvPack[0])) #must be 32bytes and only need the first item from the tuple	
+	unpack = (0,0)
+	if len(bytes(recvPack[0])) == 32:
+		unpack=struct.unpack('>B 5h 21B',bytes(recvPack[0])) #must be 32bytes and only need the first item from the tuple	
+	elif len(bytes(recvPack[0])) == 64:
+		unpack=struct.unpack('>B 18h 27B',bytes(recvPack[0]))
 	return(unpack)
-
+	
 def qtm_receive():
 	analog = qualisys.getAnalog(0)
 	ForcePlates = analog.getData()	# [Zero, Fx1, Fy1, ..., My2, Mz2]
