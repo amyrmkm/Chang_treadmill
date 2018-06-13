@@ -33,8 +33,9 @@ import os
 
  
 filename=raw_input('input test subject name?')+'.txt'
-speed = int(raw_input('input self-selected speed?'))
-speed_S = (speed,speed) # Standard speeds [ vLeft, Right ] [mm/s]
+speed = float(raw_input('input self-selected speed?'))
+print int(speed*1000)
+speed_S = (int(speed*1000),int(speed*1000)) # Standard speeds [ vLeft, Right ] [mm/s]
 ################################################################################################################################
 
 #vizshape.addAxes()
