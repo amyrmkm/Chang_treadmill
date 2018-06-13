@@ -8,7 +8,7 @@
 # 		Chang Liu ~ Oct 20, 2016 Modified
 #                         ~ Oct 21, Modified filepath to allow for input user name
 #                                   Reset camera position
-                                    
+#						  ~ Jun.6, 2018, Modified this code for PTB_stroke study
 #		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #		Python code for the baseline trial. It starts the treadmill according
 #		to "speed_S" values and saves all the step lengths for left and right 
@@ -31,9 +31,10 @@ import json
 import os
 ################################################################################################################################
 
-speed_S = (1000,1000)  # Standard speeds [ vLeft, Right ] [mm/s]
+ 
 filename=raw_input('input test subject name?')+'.txt'
-
+speed = int(raw_input('input self-selected speed?'))
+speed_S = (speed,speed) # Standard speeds [ vLeft, Right ] [mm/s]
 ################################################################################################################################
 
 #vizshape.addAxes()
@@ -190,7 +191,7 @@ if qualisysOn:
 	# Initial condition
 	updateViewHQ()
 #	time.sleep(10)
-	out = serializepacket(speed_S[0],speed_S[1],500,500,0)
+	out = serializepacket(speed_S[0],speed_S[1],100,100,0)
 	s.sendall(out)
 #	time.sleep(2)	# delay [sec]
 	
