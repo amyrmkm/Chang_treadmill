@@ -547,7 +547,7 @@ if qualisysOn:
 #	time.sleep(10)	# delay [sec]
 	
 	# perturbations variables
-	stp = 150 # 80steps initial instead of random.randint(step_range[0], step_range[1])
+	stp = 80 # 80steps initial instead of random.randint(step_range[0], step_range[1])
 	
 	Lstp_flag = 0	# identify swing phase
 	Rstp_flag = 0

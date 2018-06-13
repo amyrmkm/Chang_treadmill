@@ -177,6 +177,7 @@ def serializepacket(speedL,speedR,accL,accR,theta):
 	return(outpack)
 	
 def receivePacket(recvPack):
+	
 	unpack=struct.unpack('>B 5h 21B',bytes(recvPack[0])) #must be 32bytes and only need the first item from the tuple	
 	return(unpack)
 
