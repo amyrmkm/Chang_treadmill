@@ -240,6 +240,7 @@ def serializepacket(speedL,speedR,accL,accR,theta):
 	return(outpack)
 	
 def receivePacket(recvPack):
+	unpack = (0,0)
 	if len(bytes(recvPack[0])) == 32:
 		unpack=struct.unpack('>B 5h 21B',bytes(recvPack[0])) #must be 32bytes and only need the first item from the tuple	
 	elif len(bytes(recvPack[0])) == 64:
@@ -712,17 +713,21 @@ if temp == 'y':
     qualisys = qualisysInit()
     qualisysOn = True
 
+trial = raw_input('Input "a" for baseline SLA; Input "b" for symmetry SLA')
 if qualisysOn:
 	# visual display variables
-	alpha = (median_stepLengthLeft + median_stepLengthRight)*SLA/2	# alpha in SLA formula
-	SL_Left = median_stepLengthLeft + alpha
-	SL_Right = median_stepLengthRight - alpha
-	flagL = 0	#swing phase flags
-	flagR = 0
-	COP_L = [0,0]
-	COP_R = [0,0]
-	successL_count = 0
-	successR_count = 0
+	# add option to bring the short leg longer for symmetric walking
+	if trial == 'a':
+		alpha = (median_stepLengthLeft + median_stepLengthRight)*SLA/2	# alpha in SLA formula
+		SL_Left = median_stepLengthLeft + alpha
+		SL_Right = median_stepLengthRight - alpha
+	elif trial =='b':
+		if median_stepLengthLeft >= median_stepLengthRight:
+			SL_Left =  median_stepLengthLeft
+			SL_Right = median_stepLengthLeft
+		else:
+			SL_Right = median_stepLengthRight
+			SL_Left = median_stepLengthRight
 	
 	# Initial condition
 	updateViewHQ(LeftAnkle, RightAnkle, LeftGTO, RightGTO)
