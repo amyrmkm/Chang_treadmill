@@ -10,9 +10,9 @@ import os
 
 # inputs before the program starts
 filename=raw_input('input test subject name?')+'.txt'
-speed = float(raw_input('input self-selected speed?'))
-print int(speed*1000)
-speed_S = (int(speed*1000),int(speed*1000)) # Standard speeds [ vLeft, Right ] [mm/s]
+#speed = float(raw_input('input self-selected speed?'))
+##print int(speed*1000)
+#speed_S = (int(speed*1000),int(speed*1000)) # Standard speeds [ vLeft, Right ] [mm/s]
 
 #############################
 #vizshape.addAxes()
@@ -28,10 +28,10 @@ flagL = 1
 flagR = 1
 
 # Establish connection with Treadmill Control Panel
-HOST = '127.0.0.1' #name of the target computer that runs the treadmill controller
-PORT = 4000
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
+#HOST = '127.0.0.1' #name of the target computer that runs the treadmill controller
+#PORT = 4000
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.connect((HOST, PORT))
 
 
 
@@ -149,8 +149,8 @@ if qualisysOn:
 	# Initial condition
 	updateViewHQ()
 #	time.sleep(10)
-	out = serializepacket(speed_S[0],speed_S[1],100,100,0)
-	s.sendall(out)
+#	out = serializepacket(speed_S[0],speed_S[1],100,100,0)
+#	s.sendall(out)
 #	time.sleep(2)	# delay [sec]
 	
 	repeats = 20000

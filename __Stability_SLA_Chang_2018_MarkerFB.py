@@ -49,13 +49,15 @@ import vizmultiprocess #Vizard does not support multiprocess but it has its own 
 ##########################################################################################################################################################
 
 accel_max = 20000	# Perturbations acceleration [mm/s] // make sure to change max accel in Treadmill Panel Settings
-ptb_total= 6
+ptb_total= 5
 belt_vec = random.sample(['L','R']*ptb_total, ptb_total*2)	# 10 left + 10 right perturbations shuffled, # not count the last perturbation
-step_range = (20,30)	# min & max num steps until next perturbation  min <= x < max 
+step_range = (15,20)	# min & max num steps until next perturbation  min <= x < max 
 speed = float(raw_input('input self-selected speed?'))
 print int(speed*1000)
 speed_S = (int(speed*1000),int(speed*1000)) # Standard speeds [ vLeft, Right ] [mm/s]
-speed_P = (int(speed*1000/2),int(speed*1000/2))  # Perturbation speed
+speed_P = (int(speed*1000/3),int(speed*1000/3))  # Perturbation speed
+#speed_P = (int(speed*1000*1.5),int(speed*1000*1.5))  # Perturbation speed
+
 elapse_time=0.25
 
 start_L=[]
@@ -63,7 +65,8 @@ start_R=[]
 SLA = 0 # enter value of desired asymmetry. If positive, left leg takes longer step and right takes shorter step to maitain stride legnth constant
 flagL = 1
 flagR = 1
-
+scoreText_L = True
+scoreText_R = True
 f0 = open('C:\Users\User\Documents\Chang\Belt_ptb.txt','w') # store the sequence of perturbations
 json.dump(belt_vec,f0)
 f0.close()
@@ -113,7 +116,8 @@ viz.addChild('ground_wood.osgb')
 
 # load step length list from file ########change directory!!!
 filename=raw_input('Please input the subject name to retrieve left/right step length file')+'.txt'
-test_no=raw_input('Please input the number of the test');
+#test_no=raw_input('Please input the number of the test');
+test_no = 1
 
 temp_filepath='C:\\Users\\User\\Documents\\Chang\\LeftStepLength'+filename
 temp_stepLengthLeft = open(temp_filepath,'r') # change directory
@@ -198,7 +202,7 @@ def updateViewHQ(LeftAnkle, RightAnkle, LeftGTO, RightGTO):
 #	print xyzCamera
 	xyzCamera1 = qualisys.getMarker(2).getPosition()
 #	print xyzCamera1
-	viz.MainView.setPosition(0.1,1,.4)
+	viz.MainView.setPosition(0.1,0.5,.4)
 	viz.cam.setReset()
 	vizact.onkeydown(' ',viz.cam.reset)
 	
@@ -220,12 +224,12 @@ def updateViewHQ(LeftAnkle, RightAnkle, LeftGTO, RightGTO):
 	positionR_Hip = qualisys.getMarker(RightGTO).getPosition()
 
 	targetL = vizshape.addQuad(size=(SL_Left, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.GREEN,pos=(SL_Left/2,0.01,positionL[2]))
-	targetL2 = vizshape.addQuad(size=(SL_Left*4, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.GREEN,pos=(-SL_Left/2-.5,0.01,positionL[2]))
+	targetL2 = vizshape.addQuad(size=(SL_Left*8, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.GREEN,pos=(-4*SL_Left,0.01,positionL[2]))
 	targetL_bottom = vizshape.addQuad(size=(0.01, .25,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.RED,pos=(SL_Left - 2*sd_Left,0.01,positionL[2]))
 	targetL_top = vizshape.addQuad(size=(0.01, .25,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.RED,pos=(SL_Left + 2*sd_Left,0.01,positionL[2] ))
 
 	targetR = vizshape.addQuad(size=(SL_Right, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.BLUE,pos=( SL_Right/2 ,0.01,positionR[2]))
-	targetR2 = vizshape.addQuad(size=(SL_Right*4, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.BLUE,pos=( -SL_Right/2 -.5,0.01,positionR[2]))
+	targetR2 = vizshape.addQuad(size=(SL_Right*8, .15,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.BLUE,pos=(-4*SL_Right,0.01,positionR[2]))
 	targetR_bottom = vizshape.addQuad(size=(0.01, .25,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.RED,pos=(SL_Right - 2*sd_Right,0.01,positionR[2]))
 	targetR_top = vizshape.addQuad(size=(0.01, .25,),axis=vizshape.AXIS_Y, cullFace=False,color=viz.RED,pos=(SL_Right + 2*sd_Right,0.01,positionR[2] ))
 
@@ -292,8 +296,10 @@ def perturbation():
 		out= serializepacket(speed_S[0],speed_S[1],accel_max,accel_max,0)
 		s.sendall(out)
 		labjack_impulse()
+		ptb += 1
 		
 	elif (belt == 'R'):	# increase right speed
+		
 		out = serializepacket(speed_S[0],speed_P[1],accel_max,accel_max,0)
 		s.sendall(out)
 		belt = '0'	# next call: decelerate
@@ -306,11 +312,12 @@ def perturbation():
 		out= serializepacket(speed_S[0],speed_S[1],accel_max,accel_max,0)
 		s.sendall(out)
 		labjack_impulse()
+		ptb += 1
 		
 	else:	# decrease speed
 		out = serializepacket(speed_S[0],speed_S[1],accel_max,accel_max,0)
 		s.sendall(out)
-		ptb += 1	# one more perturbation completed
+			# one more perturbation completed
 		print ptb	
 		#print "NORMAL"
 
@@ -323,7 +330,8 @@ def labjack_impulse():
 	print "send pulse"
 ################################################################################################################################
 def AnkleTracking(flagL,flagR,LeftAnkle, RightAnkle, LeftGTO, RightGTO,ankleHeightL,ankleHeightR,successL_count,successR_count): 
-	global start_L, start_R
+	global start_L, start_R,scoreText_L,scoreText_R  
+	
 	# Show steps
 	
 	
@@ -352,7 +360,7 @@ def AnkleTracking(flagL,flagR,LeftAnkle, RightAnkle, LeftGTO, RightGTO,ankleHeig
 	temp_stepLengthRight  = positionR [0] - positionL [0]
 	# LEFT LEG
 	
-	if (GRFL>50):  # --> leg is in stance phase, hide ankle location
+	if  ( 50<GRFL<2000):  # --> leg is in stance phase, hide ankle location
 		markerposL=positionL[0]-positionR[0]
 		
 		markerL = vizshape.addQuad(size=(0.05, 0.05),axis=-vizshape.AXIS_Y, cullFace=True, cornerRadius=0.05,pos=(markerposL,positionL[1],positionL[2]))
@@ -363,52 +371,55 @@ def AnkleTracking(flagL,flagR,LeftAnkle, RightAnkle, LeftGTO, RightGTO,ankleHeig
 			if (temp_stepLengthLeft > 0):
 				flagL = 0
 				
-		if abs(markerposL -  median_stepLengthLeft)  <  8*sd_Left + 0.01 :
+		if (abs(markerposL -  median_stepLengthLeft)  <  8*sd_Left + 0.01) & (scoreText_L == True):
 #			if (positionL[1] < ankleHeightL and
 #				abs (positionL[2] - positionL_Hip[2] ) < 0.05):
 #							
-					successL_score = int(round(10 - 20*abs(1 - ( markerposL/SL_Left ))))
-					save_successL_count.append(successL_score)
+					successL_score = int(round(10 - 10*abs(1 - ( markerposL/SL_Left ))))
+#					save_successL_count.append(successL_score)
 					
 #					print total_successR_count
 #					f = open('C:\Users\User\Documents\Natalia\QTM\save_successL_count.txt','w')
 #					json.dump(save_successL_count,f)
 #					f.close()
-					
+					print successL_score
 					Text_3d.message('{}'.format(successL_score))
-					
+#					fadeOut = vizact.fadeTo(0,time=0.2) 
+					scoreText_L = False
 					#####################################################
 					###### ADJUST BASED ON TM SPEED, FOR SPEED>0.5 USE ~.5
 					##### FOR SPEED < 0.5 USE ~.7 #######################
 					#####################################################
-					time.sleep(.15)
+#					time.sleep(.15)
 								
 
-	else: # --> leg is in swing phase, track ankle location
+	elif (GRFL < 50): # --> leg is in swing phase, track ankle location
 		markerposL=positionL[0]-positionR[0]
 		markerL = vizshape.addQuad(size=(0.05, 0.05),axis=-vizshape.AXIS_Y, cullFace=False, cornerRadius=0.05,pos=(markerposL,positionL[1],positionL[2])) 
 		fadeOut = vizact.fadeTo(0,time=0.00)           
 		markerL.addAction(fadeOut)
 		temp_stepLengthLeft  = positionL [0] - positionR [0]
 		flagL = 1
-
+		scoreText_L = True
 	# RIGHT LEG
 	
-	if (GRFR>50):  # --> leg is in stance phase, hide ankle location
+	if ( 50<GRFR<2000 ):  # --> leg is in stance phase, hide ankle location
 		markerposR=positionR[0]-positionL[0]
 		markerR = vizshape.addQuad(size=(0.05, 0.05),axis=-vizshape.AXIS_Y, cullFace=True, cornerRadius=0.05,pos=(markerposR,positionR[1],positionR[2]))
 		ankleHeightR = positionR[1]
 		fadeOut = vizact.fadeTo(0,time=0.00)           
 		markerR.addAction(fadeOut)
+		
 		if (flagR == 1):
 			if (temp_stepLengthRight > 0):
 				flagR = 0
 				start_R.append(time.clock())
-		if abs(median_stepLengthRight -  markerposR)  <  8*sd_Right + 0.01:
+				
+		if (abs(median_stepLengthRight -  markerposR)  <  8*sd_Right + 0.01) & (scoreText_R == True):
 #			if (positionR[1] < ankleHeightR and
 #				abs (positionR[2] - positionR_Hip[2] ) < 0.05):
 #							
-					successR_score = int(round(10 - 20*abs(1 - ( markerposR/SL_Right ))))
+					successR_score = int(round(10 - 10*abs(1 - ( markerposR/SL_Right ))))
 					save_successR_count.append(successR_score)
 					
 #					print total_successR_count
@@ -423,15 +434,16 @@ def AnkleTracking(flagL,flagR,LeftAnkle, RightAnkle, LeftGTO, RightGTO,ankleHeig
 					###### ADJUST BASED ON TM SPEED, FOR SPEED>0.5 USE ~.5
 					##### FOR SPEED < 0.5 USE ~.7 #######################
 					#####################################################
-					time.sleep(.2)
+					scoreText_R= False
 
 
-	else: # --> leg is in swing phase, track ankle location
+	elif (GRFR < 50): # --> leg is in swing phase, track ankle location
 		markerposR=positionR[0]-positionL[0]
 		markerR = vizshape.addQuad(size=(0.05, 0.05),axis=-vizshape.AXIS_Y, cullFace=False, cornerRadius=0.05,pos=(markerposR,positionR[1],positionR[2])) 
 		fadeOut = vizact.fadeTo(0,time=0.00)           
 		markerR.addAction(fadeOut)
 		flagR = 1
+		scoreText_R= True
 
 ###############################################################		
 
@@ -547,7 +559,7 @@ def velocityToVoltage(velocityL,velocityR):
 def acquireVelocity():
 	data=s.recvfrom(1024)
 	unpackStruct=receivePacket(data)
-	print(unpackStruct)
+#	print(unpackStruct)
 	speedL=unpackStruct[2]
 	speedR=unpackStruct[1]
 	velocityToVoltage(speedL,speedR)
@@ -693,8 +705,8 @@ def labjack_impulse_R():
 			
 def check_step_timing(start_L, start_R):
 	global elapse_time_R, elapse_time_L
-	diffs_L = [ start_L[i] - start_L[i-1] for i in range(5, 30) ]
-	diffs_R = [ start_R[i] - start_R[i-1] for i in range(5, 30) ]
+	diffs_L = [ start_L[i] - start_L[i-1] for i in range(5, 25) ]
+	diffs_R = [ start_R[i] - start_R[i-1] for i in range(5, 25) ]
 	print "elapse_time",numpy.median(diffs_L)
 #	print "elapse_time",numpy.median(diffs_R)
 	####subject to change
@@ -736,7 +748,7 @@ if qualisysOn:
 #	time.sleep(10)	# delay [sec]
 	
 	# perturbations variables
-	stp = 80 # 80steps initial instead of random.randint(step_range[0], step_range[1])
+	stp = 60 # 80steps initial instead of random.randint(step_range[0], step_range[1])
 	
 	Lstp_flag = 0	# identify swing phase
 	Rstp_flag = 0
@@ -746,8 +758,8 @@ if qualisysOn:
 	ptb = 1	# current perturbation
 	
 	
-	out = serializepacket(speed_S[0],speed_S[1],200,200,0)
-	s.sendall(out)
+#	out = serializepacket(speed_S[0],speed_S[1],200,200,0)
+#	s.sendall(out)
 	vizact.ontimer2(0,viz.FOREVER,AnkleTracking,flagL,flagR,LeftAnkle, RightAnkle, LeftGTO, RightGTO,ankleHeightL,ankleHeightR,successL_count,successR_count)
 	vizact.ontimer2(0,viz.FOREVER,check_steps)
 	vizact.ontimer2(0,viz.FOREVER,acquireVelocity)
